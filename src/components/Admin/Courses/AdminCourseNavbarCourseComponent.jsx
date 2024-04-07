@@ -11,6 +11,9 @@ import Modal from "@mui/material/Modal";
 import Dropdown2 from "@/components/TailwindComponents/FormDropdown";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+import { ToastContainer, toast } from "react-toastify";
+
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -52,7 +55,8 @@ const AdminCourseNavbarCourseComponent = () => {
     instructor_name: "John Doe",
     instructor_photo: "https://example.com/instructor_photo.jpg",
     syllabus: "https://example.com/syllabus.pdf",
-    resources: ["Resource 1", "Resource 2", "Resource 3"],
+    resources_link: ["Resource 1", "Resource 2", "Resource 3"],
+    resources_pdf: ["Resource 1", "Resource 2", "Resource 3"],
     notes: ["Note 1", "Note 2", "Note 3"],
     pyq: ["PYQ 1", "PYQ 2", "PYQ 3"],
   });
@@ -65,9 +69,10 @@ const AdminCourseNavbarCourseComponent = () => {
     instructor_name: "",
     instructor_photo: "",
     syllabus: "",
-    resources: [""],
-    notes: [""],
-    pyq: [""],
+    resources_link: [[""]],
+    resources_pdf: [[""]],
+    pyq_link: [[""]],
+    pyq_pdf: [[""]],
   });
 
   // Function to handle viewing course details
@@ -90,6 +95,11 @@ const AdminCourseNavbarCourseComponent = () => {
   const openViewModal = () => {
     setViewModalOpen(true);
   };
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedSyllabus, setSelectedSyllabus] = useState(null);
+  const [selectedResourcepdf, setSelectedResourcepdf] = useState([]);
+  const [selectedpyqpdf, setSelectedpyqpdf] = useState([]);
 
   // Function to handle closing the modal
   const closeViewModal = () => {
@@ -543,9 +553,10 @@ const AdminCourseNavbarCourseComponent = () => {
         instructor_name: "John Doe",
         instructor_photo: "https://example.com/instructor_photo.jpg",
         syllabus: "https://example.com/syllabus.pdf",
-        resources: ["Resource 1", "Resource 2", "Resource 3"],
-        notes: ["Note 1", "Note 2", "Note 3"],
-        pyq: ["PYQ 1", "PYQ 2", "PYQ 3"],
+        resources_link: [["Resource 1", "https/godaddy.com"], ["Resource 2", "https/godaddy.com"], ["Resource 3", "https/godaddy.com"]],
+        resources_pdf: [["Resource 1", "https/godaddy.com"], ["Resource 2", "https/godaddy.com"], ["Resource 3", "https/godaddy.com"]],
+        pyq_link: [["pyq 1", "https/godaddy.com"], ["pyq 2", "https/godaddy.com"], ["pyq 3", "https/godaddy.com"]],
+        pyq_pdf: [["pyq 1", "https/godaddy.com"], ["pyq 2", "https/godaddy.com"], ["pyq 3", "https/godaddy.com"]],
       };
       // Set the course details state with the fetched data
       setCourseDetails(fetchedCourseDetails);
@@ -563,6 +574,22 @@ const AdminCourseNavbarCourseComponent = () => {
     newDetails[field][index] = value;
     setCourseDetails(newDetails);
   };
+  const handleInputChangeresourcelink = (index, fieldIndex, value) => {
+    const updatedResources = [...courseDetails.resources_link];
+    updatedResources[index][fieldIndex] = value;
+    setCourseDetails({ ...courseDetails, resources_link: updatedResources });
+  };
+  const handleInputChangepyqlink = (index, fieldIndex, value) => {
+    const updatedPyq = [...courseDetails.pyq_link];
+    updatedPyq[index][fieldIndex] = value;
+    setCourseDetails({ ...courseDetails, pyq_link: updatedPyq });
+  };
+
+  const handleInputChangeresourcepdf = (index, fieldIndex, value) => {
+    const updatedResources = [...courseDetails.resources_pdf];
+    updatedResources[index][fieldIndex] = value;
+    setCourseDetails({ ...courseDetails, resources_pdf: updatedResources });
+  };
 
   const handleAddField = (field) => {
     setCourseDetails((prevState) => ({
@@ -576,7 +603,144 @@ const AdminCourseNavbarCourseComponent = () => {
       ...prevState,
       [field]: prevState[field].filter((_, i) => i !== index),
     }));
+    if(field==='resources_pdf'){
+    setSelectedResourcepdf((prevState) => (
+      prevState.filter((_, i) => i !== index)
+    ));}
+    if(field==='pyq_pdf'){
+    setSelectedpyqpdf((prevState) => (
+      prevState.filter((_, i) => i !== index)
+    ));}
+    
   };
+
+  const handleChangePicture = async (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    console.log(23, file);
+    try {
+      const formData = new FormData();
+      formData.append("picture", file);
+      // formData.append("userData", JSON.stringify(userData)); // Append other user data
+      console.log(23333, formData);
+      const response = await UserService.uploadPicture(formData);
+      setPicture(response?.data?.user?.picture);
+      toast.success(response.data.message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      // Handle error message
+    }
+  };
+  const handleChangeSyllabus = async (e) => {
+    const file = e.target.files[0];
+    setSelectedSyllabus(file);
+    console.log(23, file);
+    // try {
+    //   const formData = new FormData();
+    //   formData.append("picture", file);
+    //   // formData.append("userData", JSON.stringify(userData)); // Append other user data
+    //   console.log(23333, formData);
+    //   const response = await UserService.uploadPicture(formData);
+    //   setPicture(response?.data?.user?.picture);
+    //   toast.success(response.data.message, {
+    //     position: "top-center",
+    //     autoClose: 5000,
+    //     hideProgressBar: false,
+    //     closeOnClick: true,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "colored",
+    //   });
+    // } catch (error) {
+    //   console.error("Error uploading syllabus:", error);
+    //   // Handle error message
+    // }
+  };
+  const handleChangeResourcepdf = async (index, fieldIndex, e) => {
+
+    const file = e.target.files[0];
+    const fileName = file.name; // Extracting file name from the file object
+    const newSelectedResourcepdf = [...selectedResourcepdf];
+    newSelectedResourcepdf[index] = fileName; // Storing only the file name
+    setSelectedResourcepdf(newSelectedResourcepdf);
+
+
+    console.log(23, newSelectedResourcepdf[index], " + ", e.target.value);
+
+    const updatedResources = [...courseDetails.resources_pdf];
+    updatedResources[index][fieldIndex] = file;
+    setCourseDetails({ ...courseDetails, resources_pdf: updatedResources });
+    console.log(29, file);
+    // try {
+    //   const formData = new FormData();
+    //   formData.append("picture", file);
+    //   // formData.append("userData", JSON.stringify(userData)); // Append other user data
+    //   console.log(23333, formData);
+    //   const response = await UserService.uploadPicture(formData);
+    //   setPicture(response?.data?.user?.picture);
+    //   toast.success(response.data.message, {
+    //     position: "top-center",
+    //     autoClose: 5000,
+    //     hideProgressBar: false,
+    //     closeOnClick: true,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "colored",
+    //   });
+    // } catch (error) {
+    //   console.error("Error uploading syllabus:", error);
+    //   // Handle error message
+    // }
+  };
+  const handleChangepyqpdf = async (index, fieldIndex, e) => {
+
+    const file = e.target.files[0];
+    const fileName = file.name; // Extracting file name from the file object
+    const newSelectedpyqpdf = [...selectedpyqpdf];
+    newSelectedpyqpdf[index] = fileName; // Storing only the file name
+    setSelectedpyqpdf(newSelectedpyqpdf);
+
+
+    const updatedpyq = [...courseDetails.pyq_pdf];
+    updatedpyq[index][fieldIndex] = file;
+    setCourseDetails({ ...courseDetails, pyq_pdf: updatedpyq });
+    console.log(23, newSelectedpyqpdf[index], " + ", e.target.value);
+
+    console.log(29, file);
+    // try {
+    //   const formData = new FormData();
+    //   formData.append("picture", file);
+    //   // formData.append("userData", JSON.stringify(userData)); // Append other user data
+    //   console.log(23333, formData);
+    //   const response = await UserService.uploadPicture(formData);
+    //   setPicture(response?.data?.user?.picture);
+    //   toast.success(response.data.message, {
+    //     position: "top-center",
+    //     autoClose: 5000,
+    //     hideProgressBar: false,
+    //     closeOnClick: true,
+    //     pauseOnHover: true,
+    //     draggable: true,
+    //     progress: undefined,
+    //     theme: "colored",
+    //   });
+    // } catch (error) {
+    //   console.error("Error uploading syllabus:", error);
+    //   // Handle error message
+    // }
+  };
+
   return (
     <div>
       {/* dropdowns */}
@@ -796,16 +960,24 @@ const AdminCourseNavbarCourseComponent = () => {
             >
               Upload Instructor Photo*
             </label>
-            <input
-              id="instructorphoto"
-              type="upload"
-              value={courseDetails.instructor_photo}
-              onChange={(e) => setCourseDetails(e.target.value)}
-              placeholder="Data Structures and Algorithms"
-              className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm
-                lg:text-[16px] font-medium outline-none focus:border-black mb-7 placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300 "
-              required
-            />
+            <div className="flex items-center mb-8">
+
+
+              <label htmlFor="instructorFileInput" className="color-blue-500 text-blue-400 border border-gray-300 cursor-pointer text-sm text-nowrap text-center h-10 border-rounded flex justify-center items-center w-auto px-2 rounded-lg bg-blue-200">
+                Upload Instructor Picture
+              </label>
+              <input
+                id="instructorFileInput"
+                type="file"
+                accept="image/*"
+                onChange={handleChangePicture}
+                className="hidden"
+              />
+              {selectedFile && (
+                <p className="text-center">{selectedFile.name}</p>
+              )}
+            </div>
+
 
             <label
               htmlFor="fieldofstudyName"
@@ -813,32 +985,48 @@ const AdminCourseNavbarCourseComponent = () => {
             >
               Upload Syllabus*
             </label>
-            <input
-              id="syllabus"
-              type="text"
-              value={courseDetails.syllabus}
-              onChange={(e) => setCourseDetails(e.target.value)}
-              placeholder="Data Structures and Algorithms"
-              className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm
-                lg:text-[16px] font-medium outline-none focus:border-black mb-7 placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300 "
-              required
-            />
+            <div className="flex items-center mb-8">
+              <label htmlFor="syllabusFileInput" className="color-blue-500 text-blue-400 border border-gray-300 cursor-pointer text-sm text-nowrap text-center h-10 border-rounded flex justify-center items-center w-auto px-2 rounded-lg bg-blue-200">
+                Upload Syllabus
+              </label>
+              <input
+                id="syllabusFileInput"
+                type="file"
+                accept="image/*"
+                onChange={handleChangeSyllabus}
+                className="hidden"
+              />
+              {selectedSyllabus && (
+                <p className="text-center">{selectedSyllabus.name}</p>
+              )}
+
+            </div>
 
             <label
-              htmlFor="resources"
+              htmlFor="resources_link"
               className="mb-2 text-sm text-start text-grey-900"
             >
-              Upload Resources*
+              Upload Resources* (Link)
             </label>
-            {courseDetails.resources.map((resource, index) => (
+            {courseDetails.resources_link.map((resource, index) => (
               <div key={index} className="flex mb-3">
                 <input
                   type="text"
-                  value={resource}
+                  value={resource[0]} // Assuming resource[0] is the name of the resource
                   onChange={(e) =>
-                    handleInputChange("resources", index, e.target.value)
+                    handleInputChangeresourcelink(index, 0, e.target.value) // Pass index and 0 to identify the name
                   }
-                  placeholder="Resource Name"
+                  placeholder="Link Name"
+                  className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
+                  required
+                />
+                <input
+                  type="text"
+                  value={resource[1]} // Assuming resource[1] is the URL of the resource
+                  onChange={(e) =>
+                    handleInputChangeresourcelink(index, 1, e.target.value) // Pass index and 1 to identify the URL
+                  }
+                  placeholder="Link url"
                   className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
                   required
                 />
@@ -847,77 +1035,112 @@ const AdminCourseNavbarCourseComponent = () => {
                     <Button
                       style={{ textTransform: "none" }}
                       className="max-md:hidden "
-                      onClick={() => handleDeleteField("resources", index)}
+                      onClick={() => handleDeleteField("resources_link", index)}
                       variant="outlined"
                       size="small"
                       startIcon={<DeleteIcon />}
                     >
                       Delete
                     </Button>
-                    <Button
+
+                    {/* <Button
                       className="md:hidden"
-                      onClick={() => handleDeleteField("resources", index)}
+                      onClick={() => handleDeleteField("resources_pdf", index)}
                       variant="outlined"
                       size="small"
                     >
                       <DeleteIcon />
-                    </Button>
+                    </Button> */}
+
+
                   </>
                 )}
               </div>
             ))}
+
             <Button
-              onClick={() => handleAddField("resources")}
+              onClick={() => handleAddField("resources_link")}
               cariant="outlined"
             >
               + Add More Resources
             </Button>
 
+
+
             <label
-              htmlFor="notes"
+              htmlFor="resources-pdf"
               className="mb-2 text-sm text-start text-grey-900"
             >
-              Upload Notes*
+              Upload Resources* (pdf)
             </label>
-            {courseDetails.notes.map((note, index) => (
-              <div key={index} className="flex mb-3">
+
+            {/* sd */}
+            {courseDetails.resources_pdf.map((resource, index) => (
+              <div key={index} className="flex mb-3 ">
                 <input
                   type="text"
-                  value={note}
+                  value={resource[0]} // Assuming resource[0] is the name of the resource
                   onChange={(e) =>
-                    handleInputChange("notes", index, e.target.value)
+                    handleInputChangeresourcepdf(index, 0, e.target.value) // Pass index and 0 to identify the name
                   }
-                  placeholder="Note Name"
-                  className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
+                  placeholder="Link Name"
+                  className="flex items-center w-70% px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
                   required
                 />
+                {/* <div className="flex items-center mb-8"> */}
+                <label htmlFor={`resourcePdfInput-${index}`} className="color-blue-500 text-blue-400 border border-gray-300 cursor-pointer text-sm text-nowrap text-center h-10 border-rounded flex justify-center items-center w-auto px-2 rounded-lg bg-blue-200">
+                  Upload
+                </label>
+                <input
+                  id={`resourcePdfInput-${index}`}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleChangeResourcepdf(index, 1, e)}
+                  className="hidden"
+                />
+                {selectedResourcepdf[index] && (
+                  <p className="text-center ">{selectedResourcepdf[index]}</p>
+                )}
+
+                {/* </div> */}
                 {index > 0 && (
                   <>
                     <Button
                       style={{ textTransform: "none" }}
-                      className="max-md:hidden "
-                      onClick={() => handleDeleteField("notes", index)}
+                      className="max-md:hidden m-2"
+                      onClick={() => handleDeleteField("resources_pdf", index)}
                       variant="outlined"
                       size="small"
                       startIcon={<DeleteIcon />}
                     >
                       Delete
                     </Button>
-                    <Button
+                    {/* <Button
                       className="md:hidden"
-                      onClick={() => handleDeleteField("notes", index)}
+                      onClick={() => handleDeleteField("resources_pdf", index)}
                       variant="outlined"
                       size="small"
                     >
                       <DeleteIcon />
-                    </Button>
+                    </Button> */}
+
+
                   </>
                 )}
               </div>
             ))}
-            <Button onClick={() => handleAddField("notes")} cariant="outlined">
-              + Add More Notes
+
+            <Button
+              onClick={() => handleAddField("resources_pdf")}
+              cariant="outlined"
+            >
+              + Add More Resources
             </Button>
+
+
+
+
+
 
             <label
               htmlFor="pyq"
@@ -925,15 +1148,25 @@ const AdminCourseNavbarCourseComponent = () => {
             >
               Upload PYQ*
             </label>
-            {courseDetails.pyq.map((pyq, index) => (
+            {courseDetails.pyq_link.map((pyq, index) => (
               <div key={index} className="flex mb-3">
                 <input
                   type="text"
-                  value={pyq}
+                  value={pyq[0]} // Assuming resource[0] is the name of the resource
                   onChange={(e) =>
-                    handleInputChange("pyq", index, e.target.value)
+                    handleInputChangepyqlink(index, 0, e.target.value)
                   }
                   placeholder="PYQ Name"
+                  className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
+                  required
+                />
+                <input
+                  type="text"
+                  value={pyq[1]} // Assuming resource[1] is the URL of the resource
+                  onChange={(e) =>
+                    handleInputChangepyqlink(index, 1, e.target.value) // Pass index and 1 to identify the URL
+                  }
+                  placeholder="PYQ url"
                   className="flex items-center w-full px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
                   required
                 />
@@ -941,28 +1174,102 @@ const AdminCourseNavbarCourseComponent = () => {
                   <>
                     <Button
                       style={{ textTransform: "none" }}
-                      className="max-md:hidden"
-                      onClick={() => handleDeleteField("pyq", index)}
+                      className="max-md:hidden "
+                      onClick={() => handleDeleteField("pyq_link", index)}
                       variant="outlined"
                       size="small"
                       startIcon={<DeleteIcon />}
                     >
                       Delete
                     </Button>
-                    <Button
+
+                    {/* <Button
                       className="md:hidden"
-                      onClick={() => handleDeleteField("pyq", index)}
+                      onClick={() => handleDeleteField("resources_pdf", index)}
                       variant="outlined"
                       size="small"
                     >
                       <DeleteIcon />
-                    </Button>
+                    </Button> */}
+
+
                   </>
                 )}
               </div>
             ))}
-            <Button onClick={() => handleAddField("pyq")} cariant="outlined">
+
+            <Button onClick={() => handleAddField("pyq_link")} cariant="outlined">
               + Add More PYQs
+            </Button>
+            <label
+              htmlFor="pyq-pdf"
+              className="mb-2 text-sm text-start text-grey-900"
+            >
+              Upload pyq* (pdf)
+            </label>
+
+            {/* sd */}
+            {courseDetails.pyq_pdf.map((pyq, index) => (
+              <div key={index} className="flex mb-3 ">
+                <input
+                  type="text"
+                  value={pyq[0]} // Assuming resource[0] is the name of the resource
+                  onChange={(e) =>
+                    handleInputChangepyqpdf(index, 0, e.target.value) // Pass index and 0 to identify the name
+                  }
+                  placeholder="Link Name"
+                  className="flex items-center w-70% px-2 py-2 md:px-5 md:py-3 mr-2 text-sm lg:text-[16px] font-medium outline-none focus:border-black  placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-md border border-gray-300"
+                  required
+                />
+                {/* <div className="flex items-center mb-8"> */}
+                <label htmlFor={`pyqPdfInput-${index}`} className="color-blue-500 text-blue-400 border border-gray-300 cursor-pointer text-sm text-nowrap text-center h-10 border-rounded flex justify-center items-center w-auto px-2 rounded-lg bg-blue-200">
+                  Upload
+                </label>
+                <input
+                  id={`pyqPdfInput-${index}`}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleChangepyqpdf(index, 1, e)}
+                  className="hidden"
+                />
+                {selectedpyqpdf[index] && (
+                  <p className="text-center ">
+                    {selectedpyqpdf[index]}</p>
+                )}
+
+                {/* </div> */}
+                {index > 0 && (
+                  <>
+                    <Button
+                      style={{ textTransform: "none" }}
+                      className="max-md:hidden m-2"
+                      onClick={() => handleDeleteField("pyq_pdf", index)}
+                      variant="outlined"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                    >
+                      Delete
+                    </Button>
+                    {/* <Button
+                      className="md:hidden"
+                      onClick={() => handleDeleteField("resources_pdf", index)}
+                      variant="outlined"
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </Button> */}
+
+
+                  </>
+                )}
+              </div>
+            ))}
+
+            <Button
+              onClick={() => handleAddField("pyq_pdf")}
+              cariant="outlined"
+            >
+              + Add More Resources
             </Button>
 
             <div className="pb-2 pt-4">
@@ -1148,7 +1455,7 @@ const AdminCourseNavbarCourseComponent = () => {
             >
               Resources
             </label>
-            {selectedCourse.resources.map((resource, index) => (
+            {selectedCourse.resources_link.map((resource, index) => (
               <input
                 key={index}
                 type="text"
